@@ -44,3 +44,20 @@
   </script>
 </body>
 </html>
+<script>
+  const auth = firebase.auth();
+
+  function login() {
+    const email = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    auth.signInWithEmailAndPassword(email, password)
+      .then((userCredential) => {
+        alert("✅ Logged in successfully");
+        window.location.href = "home.html"; // you can change it
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  }
+</script>
