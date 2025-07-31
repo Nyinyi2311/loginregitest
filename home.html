@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Crypto Dashboard</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; background: #1f1c2c; color: #fff; }
+    header { display: flex; justify-content: space-between; align-items: center; padding: 20px; background: #24243e; }
+    header h1 { margin: 0; color: #00ffe7; }
+    nav a { margin-left: 15px; color: #00ffcc; text-decoration: none; }
+    .logout-btn { background: #ff0066; border: none; padding: 8px 16px; border-radius: 6px; cursor: pointer; color: #fff; }
+    table { width: 100%; margin-top: 20px; border-collapse: collapse; }
+    th, td { padding: 12px; border-bottom: 1px solid #444; }
+    th { color: #00ffc8; }
+    button.action-btn { background: #00ffe7; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; color: #000; margin-right: 5px; }
+  </style>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.3.1/firebase-auth.js"></script>
+  <script>
+    const firebaseConfig = {  apiKey: "AIzaSyC2P1YJqUBbjeUtpLoOm4tef9zn-QWRdoU",
+  authDomain: "test-71d97.firebaseapp.com",
+  projectId: "test-71d97",
+  storageBucket: "test-71d97.firebasestorage.app",
+  messagingSenderId: "22649496842",
+  appId: "1:22649496842:web:e3f188881275191e0e06f3",
+  measurementId: "G-NZJJBZ75QC" };
+    firebase.initializeApp(firebaseConfig);
+  </script>
+</head>
+  <body>
+  <header>
+    <h1>Crypto Dashboard</h1>
+    <div>
+      <a href="profile.html">Profile</a>
+      <a href="balance.html">Balance</a>
+      <a href="trade.html">Trade</a>
+      <a href="history.html">History</a>
+      <button class="logout-btn" onclick="logout()">Logout</button>
+    </div>
+  </header>
+
+  <table id="crypto-table">
+    <thead>
+      <tr><th>Currency</th><th>Symbol</th><th>Price (USD)</th><th>Actions</th></tr>
+    </thead>
+    <tbody>
+      <script>
+  async function loadCryptoPrices() {
+    const res = await fetch("https://api.binance.com/api/v3/ticker/price");
+    const data = await res.json();
+    
+    const table = document.getElementById("crypto-table");
+    data.slice(0, 20).forEach((coin) => {
+      if (coin.symbol.endsWith("USDT")) {
+        const row = document.createElement("tr");
+        row.innerHTML = `
+          <td>${coin.symbol}</td>
+          <td>$${parseFloat(coin.price).toFixed(2)}</td>
+        `;
+        table.appendChild(row);
+      }
+    });
+  }
+
+  loadCryptoPrices();
+</script>
+       </tbody>
+  </table>
+    <script>
+    const auth = firebase.auth();
+    auth.onAuthStateChanged(user => {
+      if (!user) window.location.href = "index.html";
+    });
+
+    function logout() {
+      auth.signOut().then(() => window.location.href = "index.html");
+    }
+      const symbols = ["BTCUSDT","ETHUSDT","BNBUSDT","SOLUSDT","ADAUSDT"];
+
+    async function loadPrices() {
+      const tbody = document.getElementById("crypto-table").querySelector("tbody");
+      tbody.innerHTML = "";
+      for(const sym of symbols) {
+        try {
+          const res = await fetch(`https://api.binance.com/api/v3/ticker/price?symbol=${sym}`);
+          const data = await res.json();
+          const row = document.createElement("tr");
+          row.innerHTML = `
+            <td>${sym.replace("USDT","")}</td>
+            <td>${sym}</td>
+            <td>$${parseFloat(data.price).toFixed(4)}</td>
+            <td>
+              <button class="action-btn" onclick="alert('Buy ${sym}')">Buy</button>
+              <button class="action-btn" onclick="alert('Sell ${sym}')">Sell</button>
+              <button class="action-btn" onclick="alert('Request Withdraw ${sym}')">Withdraw</button>
+            </td>`;
+          tbody.appendChild(row);
+        } catch(err) {
+          console.error(err);
+        }
+      }
+    }
+  
